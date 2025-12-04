@@ -1,6 +1,7 @@
 const Advice = require('../models/Advice');
 const Strategy = require('../models/Strategy');
 const marketDataService = require('./marketDataService');
+const { getCategoryBySymbol, getRandomSymbolFromCategory, getAssetInfo } = require('../config/categories');
 
 class AIAdvisorService {
   constructor() {
@@ -26,12 +27,23 @@ class AIAdvisorService {
     return this.strategy;
   }
 
-  async generateDailyAdvice(symbol = null) {
+  async generateDailyAdvice(symbol = null, categoryId = null) {
     if (!this.strategy) {
       await this.initialize();
     }
 
-    const targetSymbol = symbol || this.selectSymbol();
+    // Determine target symbol
+    let targetSymbol;
+    if (symbol) {
+      targetSymbol = symbol;
+    } else if (categoryId) {
+      targetSymbol = getRandomSymbolFromCategory(categoryId);
+    } else {
+      targetSymbol = this.selectSymbol();
+    }
+    
+    // Get category info for the symbol
+    const categoryInfo = getCategoryBySymbol(targetSymbol);
     
     // Get market data
     const quote = await marketDataService.getStockQuote(targetSymbol);
@@ -40,9 +52,10 @@ class AIAdvisorService {
     // Calculate AI recommendation
     const analysis = this.analyzeStock(quote, indicators);
     
-    // Create advice record
+    // Create advice record with category
     const advice = await Advice.create({
       symbol: targetSymbol,
+      category: categoryInfo.id,
       action: analysis.action,
       confidence: analysis.confidence,
       priceAtAdvice: quote.price,
@@ -152,8 +165,8 @@ class AIAdvisorService {
     };
   }
 
-  selectSymbol() {
-    const watchlist = marketDataService.getWatchlist();
+  selectSymbol(categoryId = null) {
+    const watchlist = marketDataService.getWatchlist(categoryId);
     return watchlist[Math.floor(Math.random() * watchlist.length)];
   }
 

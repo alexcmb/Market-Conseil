@@ -509,3 +509,132 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--neon-cyan);
 }
+
+/* Category Filter */
+.category-filter {
+  margin-bottom: 2rem;
+}
+
+.category-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.5rem;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.category-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.category-tab.active {
+  background: rgba(0, 245, 255, 0.1);
+  border-color: var(--category-color, var(--neon-cyan));
+  color: var(--category-color, var(--neon-cyan));
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+}
+
+.category-icon {
+  font-size: 1.2rem;
+}
+
+.category-name {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Category Badge */
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid;
+  margin-left: 0.5rem;
+}
+
+.category-badge-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* Symbol Info */
+.symbol-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.asset-name {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* Responsive category tabs */
+@media (max-width: 768px) {
+  .category-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .category-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .category-tab {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .category-name {
+    display: none;
+  }
+  
+  .category-tab.active .category-name {
+    display: inline;
+  }
+}

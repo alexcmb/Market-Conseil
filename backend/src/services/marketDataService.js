@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { CATEGORIES, getAssetInfo, getCategoryBySymbol } = require('../config/categories');
 
 class MarketDataService {
   constructor() {
@@ -143,23 +144,27 @@ class MarketDataService {
   }
 
   getBasePriceForSymbol(symbol) {
-    const prices = {
-      'AAPL': 175,
-      'GOOGL': 140,
-      'MSFT': 370,
-      'AMZN': 150,
-      'TSLA': 240,
-      'META': 330,
-      'NVDA': 470,
-      'JPM': 150,
-      'V': 260,
-      'WMT': 160
-    };
-    return prices[symbol] || 100 + Math.random() * 100;
+    const assetInfo = getAssetInfo(symbol);
+    if (assetInfo) {
+      return assetInfo.basePrice;
+    }
+    return 100 + Math.random() * 100;
   }
 
-  getWatchlist() {
-    return ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'META', 'NVDA', 'JPM', 'V', 'WMT'];
+  getWatchlist(categoryId = null) {
+    if (categoryId) {
+      for (const category of Object.values(CATEGORIES)) {
+        if (category.id === categoryId) {
+          return Object.keys(category.assets);
+        }
+      }
+    }
+    // Return all symbols from all categories
+    return Object.values(CATEGORIES).flatMap(cat => Object.keys(cat.assets));
+  }
+
+  getCategoryInfo(symbol) {
+    return getCategoryBySymbol(symbol);
   }
 }
 

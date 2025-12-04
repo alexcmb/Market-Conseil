@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../components/Header';
+import CategoryFilter from '../components/CategoryFilter';
 import TodayAdvice from '../components/TodayAdvice';
 import StatsGrid from '../components/StatsGrid';
 import PerformanceChart from '../components/PerformanceChart';
@@ -15,6 +16,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState({});
   const [strategy, setStrategy] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -22,10 +25,14 @@ const Dashboard = () => {
       await adviceService.healthCheck();
       setIsConnected(true);
 
-      // Fetch all data
+      // Fetch categories first
+      const categoriesRes = await adviceService.getCategories();
+      setCategories(categoriesRes.data || []);
+
+      // Fetch all data with optional category filter
       const [latestRes, historyRes, performanceRes] = await Promise.all([
-        adviceService.getLatest(),
-        adviceService.getHistory(1, 20),
+        adviceService.getLatest(selectedCategory),
+        adviceService.getHistory(1, 20, selectedCategory),
         adviceService.getPerformance()
       ]);
 
@@ -44,7 +51,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedCategory]);
 
   useEffect(() => {
     fetchData();
@@ -53,10 +60,15 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+  const handleCategoryChange = (categoryId) => {
+    setSelectedCategory(categoryId);
+    setLoading(true);
+  };
+
   const handleGenerateAdvice = async () => {
     setLoading(true);
     try {
-      const result = await adviceService.generateAdvice();
+      const result = await adviceService.generateAdvice(null, selectedCategory);
       setLatestAdvice(result.data);
       // Refresh all data
       await fetchData();
@@ -81,11 +93,20 @@ const Dashboard = () => {
       <Header isConnected={isConnected} />
       
       <main className="main-container">
+        {/* Category Filter */}
+        <CategoryFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={handleCategoryChange}
+        />
+
         {/* Today's Advice */}
         <TodayAdvice 
           advice={latestAdvice} 
           onGenerate={handleGenerateAdvice}
           loading={loading && !latestAdvice}
+          selectedCategory={selectedCategory}
+          categories={categories}
         />
 
         {/* Stats Overview */}
