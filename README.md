@@ -11,7 +11,7 @@ A MERN stack application featuring an avant-garde black/neon design that provide
 ## ✨ Features
 
 - **AI-Generated Financial Advice**: Daily Buy/Sell/Hold recommendations with confidence scores
-- **Real Market Data Integration**: Alpha Vantage/Yahoo Finance API for live stock data
+- **Real Market Data Integration**: Alpha Vantage API for live stock data
 - **Technical Analysis**: RSI, MACD, SMA crossovers, volume analysis, and momentum tracking
 - **Self-Learning AI**: Automatically evaluates past advice and adjusts strategy weights
 - **Performance Tracking**: Success rate, average score, and outcome distribution

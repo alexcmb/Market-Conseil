@@ -6,7 +6,11 @@ const adviceController = {
   generateAdvice: async (req, res) => {
     try {
       const { symbol } = req.body;
-      const advice = await aiAdvisorService.generateDailyAdvice(symbol);
+      // Validate symbol if provided
+      const validSymbol = symbol && typeof symbol === 'string' 
+        ? symbol.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 10) 
+        : null;
+      const advice = await aiAdvisorService.generateDailyAdvice(validSymbol);
       res.status(201).json({
         success: true,
         data: advice

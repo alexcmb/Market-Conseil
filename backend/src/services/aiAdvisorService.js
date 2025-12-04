@@ -13,6 +13,7 @@ class AIAdvisorService {
     if (!this.strategy) {
       this.strategy = await Strategy.create({
         name: 'default',
+        // Weights must sum to 1.0 for proper scoring
         weights: {
           rsiWeight: 0.2,
           macdWeight: 0.25,
@@ -270,14 +271,23 @@ class AIAdvisorService {
     const adjustments = {};
     
     if (currentSuccessRate < 40) {
-      // Major adjustment needed
-      adjustments.rsiWeight = this.strategy.weights.rsiWeight * 0.9;
-      adjustments.macdWeight = this.strategy.weights.macdWeight * 1.1;
+      // Major adjustment needed - adjust weights while maintaining sum of 1.0
+      const rsiDelta = this.strategy.weights.rsiWeight * 0.1;
+      adjustments.rsiWeight = this.strategy.weights.rsiWeight - rsiDelta;
+      adjustments.macdWeight = this.strategy.weights.macdWeight + rsiDelta;
       this.strategy.weights.rsiWeight = adjustments.rsiWeight;
       this.strategy.weights.macdWeight = adjustments.macdWeight;
       
       // Adjust thresholds
       this.strategy.thresholds.confidenceMin = Math.min(70, this.strategy.thresholds.confidenceMin + 5);
+    }
+
+    // Normalize weights to ensure they sum to 1.0
+    const totalWeight = Object.values(this.strategy.weights).reduce((sum, w) => sum + w, 0);
+    if (Math.abs(totalWeight - 1.0) > 0.001) {
+      Object.keys(this.strategy.weights).forEach(key => {
+        this.strategy.weights[key] = this.strategy.weights[key] / totalWeight;
+      });
     }
 
     // Record learning history
