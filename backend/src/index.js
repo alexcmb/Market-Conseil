@@ -5,7 +5,9 @@ const rateLimit = require('express-rate-limit');
 const cron = require('node-cron');
 const connectDB = require('./config/database');
 const adviceRoutes = require('./routes/adviceRoutes');
+const promptRoutes = require('./routes/promptRoutes');
 const aiAdvisorService = require('./services/aiAdvisorService');
+const promptAnalysisService = require('./services/promptAnalysisService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,6 +26,7 @@ app.use('/api', limiter);
 
 // Routes
 app.use('/api/advice', adviceRoutes);
+app.use('/api/analysis', promptRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -39,6 +42,10 @@ const startServer = async () => {
     // Initialize AI Advisor
     await aiAdvisorService.initialize();
     console.log('AI Advisor initialized');
+
+    // Initialize Prompt Analysis Service
+    await promptAnalysisService.initialize();
+    console.log('Prompt Analysis Service initialized');
 
     // Schedule daily advice generation at 9:30 AM (market open)
     cron.schedule('30 9 * * 1-5', async () => {

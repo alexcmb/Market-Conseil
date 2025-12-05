@@ -14,6 +14,9 @@ A MERN stack application featuring an avant-garde black/neon design that provide
 - **Real Market Data Integration**: Alpha Vantage API for live stock data
 - **Technical Analysis**: RSI, MACD, SMA crossovers, volume analysis, and momentum tracking
 - **Self-Learning AI**: Automatically evaluates past advice and adjusts strategy weights
+- **🆕 Prompt-Based Analysis**: Customizable AI analysis using natural language prompts
+- **🆕 Real-Time Analysis**: On-demand market analysis with custom queries
+- **🆕 AI Self-Correction**: Automatic correction of predictions based on market feedback
 - **Performance Tracking**: Success rate, average score, and outcome distribution
 - **Avant-Garde UI**: Black/neon cyberpunk design with smooth animations
 - **Fully Dockerized**: Ready for deployment with Docker Compose
@@ -23,6 +26,7 @@ A MERN stack application featuring an avant-garde black/neon design that provide
 ### Backend
 - **Node.js** with Express.js
 - **MongoDB** with Mongoose ODM
+- **OpenAI** for AI-powered analysis (optional)
 - **Axios** for API calls
 - **Node-cron** for scheduled tasks
 
@@ -46,6 +50,7 @@ cd Market-Conseil
 
 # Set up environment variables (optional)
 export ALPHA_VANTAGE_API_KEY=your_api_key
+export OPENAI_API_KEY=your_openai_key  # For AI-powered analysis
 
 # Start all services
 docker compose up -d
@@ -75,6 +80,8 @@ npm start
 
 ## 📊 API Endpoints
 
+### Advice API
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/advice/generate` | Generate new AI advice |
@@ -83,6 +90,18 @@ npm start
 | POST | `/api/advice/evaluate` | Evaluate past advice performance |
 | GET | `/api/advice/performance` | Get performance statistics |
 | GET | `/api/health` | Health check |
+
+### 🆕 Analysis API (Prompt-Based)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/analysis/prompts` | Get available analysis prompts |
+| POST | `/api/analysis/prompts` | Create a new prompt |
+| PUT | `/api/analysis/prompts/:id` | Update an existing prompt |
+| POST | `/api/analysis/analyze` | Analyze with a specific prompt |
+| POST | `/api/analysis/realtime` | Real-time analysis with custom query |
+| POST | `/api/analysis/correct/:adviceId` | Self-correct a previous advice |
+| GET | `/api/analysis/corrections` | Get correction history |
 
 ## 🧠 AI Strategy
 
@@ -103,6 +122,19 @@ The system automatically:
 2. Calculates performance scores
 3. Adjusts strategy weights based on success rate
 4. Maintains a learning history log
+
+### 🆕 Prompt-Based Analysis
+
+The new prompt-based analysis feature allows:
+- **Custom Prompts**: Create and manage analysis prompts for different strategies
+- **Real-Time Queries**: Ask natural language questions about any asset
+- **AI Self-Correction**: System reviews past predictions and auto-corrects based on market feedback
+
+#### Available Default Prompts:
+- `technical_analysis` - Comprehensive technical analysis
+- `momentum_analysis` - Focus on momentum and trends
+- `risk_assessment` - Risk-focused analysis for conservative investors
+- `self_correction` - System prompt for auto-correction
 
 ## 🎨 Design System
 
@@ -150,6 +182,7 @@ Market-Conseil/
 - `PORT` - Server port (default: 5000)
 - `MONGODB_URI` - MongoDB connection string
 - `ALPHA_VANTAGE_API_KEY` - Alpha Vantage API key
+- `OPENAI_API_KEY` - OpenAI API key (optional, for AI-powered analysis)
 
 #### Frontend
 - `REACT_APP_API_URL` - Backend API URL
