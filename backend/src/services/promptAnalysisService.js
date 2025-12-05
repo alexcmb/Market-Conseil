@@ -5,6 +5,18 @@ const Advice = require('../models/Advice');
 const marketDataService = require('./marketDataService');
 const { getCategoryBySymbol, getAssetInfo } = require('../config/categories');
 
+// Configuration constants
+const CONFIG = {
+  OPENAI_MODEL: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+  OPENAI_TEMPERATURE: parseFloat(process.env.OPENAI_TEMPERATURE) || 0.7,
+  OPENAI_MAX_TOKENS: parseInt(process.env.OPENAI_MAX_TOKENS) || 500,
+  CONFIDENCE_MAX: 95,
+  CONFIDENCE_MIN: 0,
+  CONFIDENCE_DEFAULT: 50,
+  PRICE_CHANGE_THRESHOLD: 2, // percentage threshold for price change classification
+  SIGNIFICANT_PRICE_CHANGE: 5 // percentage for significant moves
+};
+
 class PromptAnalysisService {
   constructor() {
     this.openai = null;
@@ -243,13 +255,13 @@ JSON response:
   async callOpenAI(systemPrompt, userPrompt) {
     try {
       const completion = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: CONFIG.OPENAI_MODEL,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.7,
-        max_tokens: 500
+        temperature: CONFIG.OPENAI_TEMPERATURE,
+        max_tokens: CONFIG.OPENAI_MAX_TOKENS
       });
 
       const responseText = completion.choices[0].message.content;
@@ -262,7 +274,7 @@ JSON response:
           action: ['BUY', 'SELL', 'HOLD'].includes(parsed.action?.toUpperCase()) 
             ? parsed.action.toUpperCase() 
             : 'HOLD',
-          confidence: Math.min(95, Math.max(0, parseInt(parsed.confidence) || 50)),
+          confidence: Math.min(CONFIG.CONFIDENCE_MAX, Math.max(CONFIG.CONFIDENCE_MIN, parseInt(parsed.confidence) || CONFIG.CONFIDENCE_DEFAULT)),
           targetPrice: parseFloat(parsed.targetPrice) || 0,
           reasoning: parsed.reasoning || 'AI analysis completed'
         };
@@ -356,13 +368,13 @@ JSON response:
     // Determine actual outcome based on price movement
     let actualOutcome;
     if (advice.action === 'BUY') {
-      actualOutcome = priceChange > 2 ? 'Price increased as expected' : 
-                      priceChange < -2 ? 'Price decreased unexpectedly' : 'Price stable';
+      actualOutcome = priceChange > CONFIG.PRICE_CHANGE_THRESHOLD ? 'Price increased as expected' : 
+                      priceChange < -CONFIG.PRICE_CHANGE_THRESHOLD ? 'Price decreased unexpectedly' : 'Price stable';
     } else if (advice.action === 'SELL') {
-      actualOutcome = priceChange < -2 ? 'Price decreased as expected' :
-                      priceChange > 2 ? 'Price increased unexpectedly' : 'Price stable';
+      actualOutcome = priceChange < -CONFIG.PRICE_CHANGE_THRESHOLD ? 'Price decreased as expected' :
+                      priceChange > CONFIG.PRICE_CHANGE_THRESHOLD ? 'Price increased unexpectedly' : 'Price stable';
     } else {
-      actualOutcome = Math.abs(priceChange) < 2 ? 'Price stayed stable as expected' : 'Price moved unexpectedly';
+      actualOutcome = Math.abs(priceChange) < CONFIG.PRICE_CHANGE_THRESHOLD ? 'Price stayed stable as expected' : 'Price moved unexpectedly';
     }
 
     const expectedOutcome = advice.action === 'BUY' ? 'Price increase' :
@@ -459,7 +471,7 @@ JSON response:
   generateFallbackCorrection(advice, priceChange, indicators) {
     const wasCorrect = (advice.action === 'BUY' && priceChange > 0) ||
                        (advice.action === 'SELL' && priceChange < 0) ||
-                       (advice.action === 'HOLD' && Math.abs(priceChange) < 2);
+                       (advice.action === 'HOLD' && Math.abs(priceChange) < CONFIG.PRICE_CHANGE_THRESHOLD);
 
     if (wasCorrect) {
       return { shouldCorrect: false };
@@ -478,11 +490,11 @@ JSON response:
       correctedAction = 'SELL';
       correctedConfidence = 70;
       reason = 'Current RSI indicates overbought conditions, suggesting a selling opportunity';
-    } else if (priceChange > 5) {
+    } else if (priceChange > CONFIG.SIGNIFICANT_PRICE_CHANGE) {
       correctedAction = 'SELL';
       correctedConfidence = 65;
       reason = 'Significant price increase suggests taking profits';
-    } else if (priceChange < -5) {
+    } else if (priceChange < -CONFIG.SIGNIFICANT_PRICE_CHANGE) {
       correctedAction = 'BUY';
       correctedConfidence = 65;
       reason = 'Significant price drop may present a buying opportunity';

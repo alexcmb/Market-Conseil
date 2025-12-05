@@ -5,10 +5,19 @@ const SelfCorrectionPanel = ({ history, onCorrectionApplied }) => {
   const [corrections, setCorrections] = useState([]);
   const [loading, setLoading] = useState(false);
   const [correcting, setCorrecting] = useState(null);
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     loadCorrectionHistory();
   }, []);
+
+  // Auto-dismiss messages after 5 seconds
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   const loadCorrectionHistory = async () => {
     try {
@@ -22,6 +31,7 @@ const SelfCorrectionPanel = ({ history, onCorrectionApplied }) => {
   const handleSelfCorrect = async (adviceId) => {
     setCorrecting(adviceId);
     setLoading(true);
+    setMessage(null);
     
     try {
       const result = await analysisService.selfCorrect(adviceId);
@@ -32,15 +42,21 @@ const SelfCorrectionPanel = ({ history, onCorrectionApplied }) => {
         if (onCorrectionApplied) {
           onCorrectionApplied(result.data);
         }
+        setMessage({
+          type: 'success',
+          text: `Correction applied: ${result.data.correction.correctionReason}`
+        });
+      } else {
+        setMessage({
+          type: 'info',
+          text: `No correction needed: ${result.data.reason}`
+        });
       }
-      
-      // Show result
-      alert(result.data.shouldCorrect 
-        ? `✅ Correction applied: ${result.data.correction.correctionReason}`
-        : `ℹ️ No correction needed: ${result.data.reason}`
-      );
     } catch (err) {
-      alert(`❌ Error: ${err.response?.data?.error || 'Self-correction failed'}`);
+      setMessage({
+        type: 'error',
+        text: `Error: ${err.response?.data?.error || 'Self-correction failed'}`
+      });
     } finally {
       setLoading(false);
       setCorrecting(null);
@@ -55,6 +71,16 @@ const SelfCorrectionPanel = ({ history, onCorrectionApplied }) => {
         <h2 className="card-title">🔄 AI Self-Correction</h2>
       </div>
       <div className="card-body">
+        {/* Feedback Message */}
+        {message && (
+          <div className={`feedback-message feedback-${message.type}`}>
+            {message.type === 'success' && '✅ '}
+            {message.type === 'info' && 'ℹ️ '}
+            {message.type === 'error' && '❌ '}
+            {message.text}
+          </div>
+        )}
+
         {/* Pending Advice for Correction */}
         <div className="section">
           <h3 className="section-title">Pending Advice (Can Auto-Correct)</h3>
