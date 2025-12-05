@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../components/Header';
 import CategoryFilter from '../components/CategoryFilter';
 import TodayAdvice from '../components/TodayAdvice';
+import RealTimeAnalysis from '../components/RealTimeAnalysis';
+import SelfCorrectionPanel from '../components/SelfCorrectionPanel';
 import StatsGrid from '../components/StatsGrid';
 import PerformanceChart from '../components/PerformanceChart';
 import HistoryTable from '../components/HistoryTable';
@@ -109,6 +111,9 @@ const Dashboard = () => {
           categories={categories}
         />
 
+        {/* Real-Time AI Analysis */}
+        <RealTimeAnalysis categories={categories} />
+
         {/* Stats Overview */}
         <StatsGrid stats={stats} />
 
@@ -120,6 +125,12 @@ const Dashboard = () => {
           <HistoryTable history={history} />
           <LearningPanel strategy={strategy} />
         </div>
+
+        {/* Self-Correction Panel */}
+        <SelfCorrectionPanel 
+          history={history} 
+          onCorrectionApplied={fetchData}
+        />
 
         {/* Evaluation Button */}
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
