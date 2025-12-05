@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const adviceController = require('../controllers/adviceController');
 
+// Get all categories
+router.get('/categories', adviceController.getCategories);
+
 // Generate new advice
 router.post('/generate', adviceController.generateAdvice);
 

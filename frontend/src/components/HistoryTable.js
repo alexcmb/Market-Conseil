@@ -10,6 +10,31 @@ const HistoryTable = ({ history }) => {
     });
   };
 
+  const getCategoryStyle = (category) => {
+    const categoryColors = {
+      crypto: '#f7931a',
+      stocks: '#00f5ff',
+      etf: '#ff00ff',
+      indices: '#00ff88'
+    };
+    const color = categoryColors[category] || '#00f5ff';
+    return {
+      backgroundColor: color + '20',
+      color: color,
+      border: `1px solid ${color}`
+    };
+  };
+
+  const getCategoryIcon = (category) => {
+    const icons = {
+      crypto: '₿',
+      stocks: '📈',
+      etf: '📊',
+      indices: '🌍'
+    };
+    return icons[category] || '📈';
+  };
+
   return (
     <div className="card">
       <div className="card-header">
@@ -21,6 +46,7 @@ const HistoryTable = ({ history }) => {
             <tr>
               <th>Date</th>
               <th>Symbol</th>
+              <th>Category</th>
               <th>Action</th>
               <th>Price</th>
               <th>Confidence</th>
@@ -33,7 +59,22 @@ const HistoryTable = ({ history }) => {
               history.map((item) => (
                 <tr key={item._id}>
                   <td>{formatDate(item.createdAt)}</td>
-                  <td style={{ fontWeight: 600 }}>{item.symbol}</td>
+                  <td>
+                    <div style={{ fontWeight: 600 }}>{item.symbol}</div>
+                    {item.assetInfo && (
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        {item.assetInfo.name}
+                      </div>
+                    )}
+                  </td>
+                  <td>
+                    <span 
+                      className="category-badge-small" 
+                      style={getCategoryStyle(item.category)}
+                    >
+                      {getCategoryIcon(item.category)}
+                    </span>
+                  </td>
                   <td>
                     <span className={`action-badge ${item.action?.toLowerCase()}`}>
                       {item.action}
@@ -51,7 +92,7 @@ const HistoryTable = ({ history }) => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                <td colSpan="8" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
                   No history yet. Generate some advice to get started!
                 </td>
               </tr>

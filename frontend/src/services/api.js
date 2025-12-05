@@ -10,21 +10,31 @@ const api = axios.create({
 });
 
 export const adviceService = {
-  // Generate new advice
-  generateAdvice: async (symbol = null) => {
-    const response = await api.post('/advice/generate', { symbol });
+  // Get all categories
+  getCategories: async () => {
+    const response = await api.get('/advice/categories');
     return response.data;
   },
 
-  // Get advice history
-  getHistory: async (page = 1, limit = 20) => {
-    const response = await api.get('/advice/history', { params: { page, limit } });
+  // Generate new advice (with optional category)
+  generateAdvice: async (symbol = null, category = null) => {
+    const response = await api.post('/advice/generate', { symbol, category });
     return response.data;
   },
 
-  // Get latest advice
-  getLatest: async () => {
-    const response = await api.get('/advice/latest');
+  // Get advice history (with optional category filter)
+  getHistory: async (page = 1, limit = 20, category = null) => {
+    const params = { page, limit };
+    if (category) params.category = category;
+    const response = await api.get('/advice/history', { params });
+    return response.data;
+  },
+
+  // Get latest advice (with optional category filter)
+  getLatest: async (category = null) => {
+    const params = {};
+    if (category) params.category = category;
+    const response = await api.get('/advice/latest', { params });
     return response.data;
   },
 
